@@ -30,7 +30,9 @@ class Server:
     def indexed_dataset(self) -> Dict[int, List]:
         """Load indexed dataset"""
         if self.__indexed_dataset is None:
-            self.__indexed_dataset = [(i, row) for i, row in enumerate(self.dataset())]
+            self.__indexed_dataset = [
+                (i, row) for i, row in enumerate(self.dataset())
+            ]
 
         return self.__indexed_dataset
 
