@@ -36,8 +36,8 @@ class Server:
     def get_hyper(self, page: int = 1, page_size: int = 10) -> dict:
         """Get hypermedia pagination"""
         data = self.get_page(page, page_size)
-        dataset = self.dataset()
-        total_pages = len(dataset) // page_size + (len(dataset) % page_size > 0)
+        total_pages = len(self.dataset())
+        total_pages = total_pages // page_size + (total_pages % page_size > 0)
 
         return {
             "page_size": len(data),
