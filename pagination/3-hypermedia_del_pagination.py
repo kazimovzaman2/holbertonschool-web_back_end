@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
-"""Python pagination module"""
+"""
+Deletion-resilient hypermedia pagination
+"""
+
 import csv
-from typing import Dict, List
-
-
-index_range = __import__("0-simple_helper_function").index_range
+import math
+from typing import List, Dict
 
 
 class Server:
-    """Server class to paginate"""
+    """Server class to paginate a database of popular baby names."""
 
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
-        """Initialize the server"""
         self.__dataset = None
         self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
-        """Load dataset"""
+        """Cached dataset"""
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
                 reader = csv.reader(f)
@@ -28,33 +28,27 @@ class Server:
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
-        """Load indexed dataset"""
+        """Dataset indexed by sorting position, starting at 0"""
         if self.__indexed_dataset is None:
-            self.__indexed_dataset = [
-                (i, row) for i, row in enumerate(self.dataset())
-            ]
-
+            dataset = self.dataset()
+            truncated_dataset = dataset[:1000]
+            self.__indexed_dataset = {i: dataset[i] for i in range(len(dataset))}
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        """Get hypermedia pagination with index"""
-        assert 0 <= index < len(self.dataset())
-
-        indexed_dataset = self.indexed_dataset()
-        indexed_page = {}
-
-        i = index
-        while len(indexed_page) < page_size and i < len(self.dataset()):
-            if i in indexed_dataset:
-                indexed_page[i] = indexed_dataset[i]
-            i += 1
-
-        page = list(indexed_page.values())
-        page_indices = indexed_page.keys()
-
+        """return a dictionary"""
+        assert type(index) == int and type(page_size) == int
+        assert 0 <= index < len(self.indexed_dataset())
+        pages = []
+        next_index = index + page_size
+        for i in range(index, index + page_size):
+            if not self.indexed_dataset().get(i):
+                i += 1
+                next_index += 1
+            pages.append(self.indexed_dataset()[i])
         return {
             "index": index,
-            "next_index": max(page_indices) + 1,
-            "page_size": len(page),
-            "data": page,
+            "next_index": next_index,
+            "page_size": page_size,
+            "data": pages,
         }
