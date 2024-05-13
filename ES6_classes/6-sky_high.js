@@ -14,8 +14,16 @@ export default class SkyHighBuilding extends Building {
     return this._sqft;
   }
 
+  set sqft(newSqft) {
+    this._sqft = newSqft;
+  }
+
   get floors() {
     return this._floors;
+  }
+
+  set floors(newFloors) {
+    this._floors = newFloors;
   }
 
   evacuationWarningMessage() {
